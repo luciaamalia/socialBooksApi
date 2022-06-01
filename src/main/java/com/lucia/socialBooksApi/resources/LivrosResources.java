@@ -3,8 +3,12 @@ package com.lucia.socialBooksApi.resources;
 import com.lucia.socialBooksApi.domain.Livro;
 import com.lucia.socialBooksApi.repository.LivrosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -22,14 +26,24 @@ public class LivrosResources {
         }
 
         @RequestMapping(method = RequestMethod.POST)
-        public void salvar(@RequestBody Livro livro){
-            livrosRepository.save(livro);
-            // pegue as info e coloque dentro desse livro
+        public ResponseEntity<Object> salvar(@RequestBody Livro livro){
+            livrosRepository.save(livro);// pegue as info e coloque dentro desse livro
+
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}").buildAndExpand(livro.getId()).toUri();
+
+            return ResponseEntity.created(uri).build();
+
         }
 
         @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-        public Livro buscar(@PathVariable("id") Long id) {
-            return livrosRepository.findById(id).get();
+        public ResponseEntity<?> buscar(@PathVariable("id") Long id) {
+            Livro livro = livrosRepository.findById(id).get(); // se ele buscar o livro e não encontrá-lo ele cai no erro 404 se nao 200 OK
+
+            if (livro == null){
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(livro);
         }
 
         @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
