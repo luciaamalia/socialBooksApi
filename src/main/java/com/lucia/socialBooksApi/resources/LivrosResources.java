@@ -2,7 +2,10 @@ package com.lucia.socialBooksApi.resources;
 
 import com.lucia.socialBooksApi.domain.Livro;
 import com.lucia.socialBooksApi.repository.LivrosRepository;
+import com.lucia.socialBooksApi.services.LivrosService;
+import com.lucia.socialBooksApi.services.exceptions.LivroNaoEncontradoException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,18 +19,18 @@ import java.util.List;
 public class LivrosResources {
 
     @Autowired //procura implementação pra essa variavel
-    private LivrosRepository livrosRepository; //
+    private LivrosService livrosService; //
 
 
     //ao acessar esse metodo pelo get http ira retornar esta string
         @RequestMapping(method = RequestMethod.GET)
-        public List<Livro> listar(){
-            return livrosRepository.findAll();
+        public ResponseEntity<List<Livro>> listar(){
+            return ResponseEntity.status(HttpStatus.OK).body(livrosService.listar());
         }
 
         @RequestMapping(method = RequestMethod.POST)
-        public ResponseEntity<Object> salvar(@RequestBody Livro livro){
-            livrosRepository.save(livro);// pegue as info e coloque dentro desse livro
+        public ResponseEntity<Void> salvar(@RequestBody Livro livro){
+            livro = livrosService.salvar(livro);          // pegue as info e coloque dentro desse livro;
 
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                     .path("/{id}").buildAndExpand(livro.getId()).toUri();
@@ -38,22 +41,35 @@ public class LivrosResources {
 
         @RequestMapping(value = "/{id}", method = RequestMethod.GET)
         public ResponseEntity<?> buscar(@PathVariable("id") Long id) {
-            Livro livro = livrosRepository.findById(id).get(); // se ele buscar o livro e não encontrá-lo ele cai no erro 404 se nao 200 OK
-
-            if (livro == null){
+            Livro livro = null; // se ele buscar o livro e não encontrá-lo ele cai no erro 404 se nao 200 OK
+            try {
+                livro = livrosService.buscar(id);
+            } catch (LivroNaoEncontradoException e){
                 return ResponseEntity.notFound().build();
             }
             return ResponseEntity.status(HttpStatus.OK).body(livro);
         }
 
         @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-        public void deletar(@PathVariable("id") Long id){
-             livrosRepository.deleteById(id);
+        public ResponseEntity<Void> deletar(@PathVariable("id") Long id) {
+            try {
+                livrosService.deletar(id);
+            } catch (EmptyResultDataAccessException e) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.noContent().build();
         }
 
         @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-        public void atualizar(@RequestBody Livro livro, @PathVariable("id") Long id){
-            livro.setId(id);
-            livrosRepository.save(livro);
+        public ResponseEntity<Void> atualizar(@RequestBody Livro livro, @PathVariable("id") Long id){
+            livro.setId(id); //garantir q vai atualizar
+            try{
+                livrosService.atualizar(livro); //verifica se ele existe e att caso contrario manda um not found
+            }catch (LivroNaoEncontradoException e){
+                return ResponseEntity.notFound().build();
+            }
+           livrosService.atualizar(livro);
+
+            return ResponseEntity.noContent().build();
         }
 }
