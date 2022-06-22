@@ -1,6 +1,7 @@
 package com.lucia.socialBooksApi.resources;
 
 
+import com.lucia.socialBooksApi.domain.Comentario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,5 +61,11 @@ public class LivrosResources {
         livrosService.atualizar(livro);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @RequestMapping(value = "{id}/comentarios", method = RequestMethod.POST)
+    public void adicionarComentario(@PathVariable("id") Long livroId,
+                                    @RequestBody Comentario comentario){
+
     }
 }
