@@ -63,9 +63,14 @@ public class LivrosResources {
         return ResponseEntity.noContent().build();
     }
 
-    @RequestMapping(value = "{id}/comentarios", method = RequestMethod.POST)
-    public void adicionarComentario(@PathVariable("id") Long livroId,
-                                    @RequestBody Comentario comentario){
+    @RequestMapping(value = "/{id}/comentarios", method = RequestMethod.POST)
+    public ResponseEntity<Void> adicionarComentario(@PathVariable("id") Long livroId,
+                                                    @RequestBody Comentario comentario) {
 
+        livrosService.salvarComentario(livroId, comentario);
+
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
+
+        return ResponseEntity.created(uri).build();
     }
 }

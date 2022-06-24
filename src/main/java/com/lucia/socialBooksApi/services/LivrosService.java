@@ -1,12 +1,15 @@
 package com.lucia.socialBooksApi.services;
 
+import com.lucia.socialBooksApi.domain.Comentario;
 import com.lucia.socialBooksApi.domain.Livro;
+import com.lucia.socialBooksApi.repository.ComentariosRepository;
 import com.lucia.socialBooksApi.repository.LivrosRepository;
 import com.lucia.socialBooksApi.services.exceptions.LivroNaoEncontradoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -14,6 +17,9 @@ public class LivrosService {
 
     @Autowired
     private LivrosRepository livrosRepository;
+
+    @Autowired
+    private ComentariosRepository comentariosRepository;
 
     public List<Livro> listar(){
         return livrosRepository.findAll();
@@ -46,6 +52,15 @@ public class LivrosService {
     }
     public  void verificarExistencia(Livro livro){
         buscar(livro.getId());
+    }
+
+    public Comentario salvarComentario(Long livroId, Comentario comentario) {
+        Livro livro = buscar(livroId);
+
+        comentario.setLivro(livro);
+        comentario.setData(new Date());
+
+        return comentariosRepository.save(comentario);
     }
 
 }
