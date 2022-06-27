@@ -46,11 +46,12 @@ public class LivrosService {
             throw new LivroNaoEncontradoException("O livro não pode ser encontrado" );
         }
     }
-    public void atualizar(Livro livro){
+    public void atualizar(Livro livro) {
         verificarExistencia(livro);
         livrosRepository.save(livro);
     }
-    public  void verificarExistencia(Livro livro){
+
+    private void verificarExistencia(Livro livro) {
         buscar(livro.getId());
     }
 
@@ -61,6 +62,12 @@ public class LivrosService {
         comentario.setData(new Date());
 
         return comentariosRepository.save(comentario);
+    }
+
+    public List<Comentario> listarComentarios(Long livroId) {
+        Livro livro = buscar(livroId);
+
+        return livro.getComentarios();
     }
 
 }

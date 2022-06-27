@@ -1,45 +1,48 @@
 package com.lucia.socialBooksApi.domain;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
-@Entity
-public class Livro<Comentario> {
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@Entity
+public class Livro {
+
+    @JsonInclude(Include.NON_NULL)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String nome;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(Include.NON_NULL)
     private Date publicacao;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(Include.NON_NULL)
     private String editora;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(Include.NON_NULL)
     private String resumo;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @Transient
+    @JsonInclude(Include.NON_NULL)
+    @OneToMany(mappedBy = "livro")
     private List<Comentario> comentarios;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(Include.NON_NULL)
     private String autor;
 
+    public Livro() {}
 
-    public Livro(){} //construtor vazio
-
-    public Livro(String nome){ //construtor para passar o nome do livro
+    public Livro(String nome) {
         this.nome = nome;
     }
-
 
     public Long getId() {
         return id;
@@ -96,4 +99,5 @@ public class Livro<Comentario> {
     public void setAutor(String autor) {
         this.autor = autor;
     }
+
 }
